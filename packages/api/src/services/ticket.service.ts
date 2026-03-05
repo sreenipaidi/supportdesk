@@ -777,6 +777,17 @@ export async function updateTicket(
   // Apply updates
   await db.update(tickets).set(updateValues).where(eq(tickets.id, ticketId));
 
+  // --- Post-update: Create CSAT survey when ticket is resolved ---
+  if (input.status === 'resolved') {
+    try {
+      const { createSurvey } = await import('./csat.service.js');
+      await createSurvey(tenantId, ticketId);
+    } catch (err) {
+      const logger = getLogger();
+      logger.error({ err, tenantId, ticketId }, 'Failed to create CSAT survey on resolve');
+    }
+  }
+
   // Fetch updated ticket
   const [updatedRow] = await db
     .select()

@@ -20,6 +20,12 @@ import { KBArticlePage } from './pages/KBArticlePage.js';
 import { KBSearchPage } from './pages/KBSearchPage.js';
 import { KBManagePage } from './pages/KBManagePage.js';
 import { KBArticleEditPage } from './pages/KBArticleEditPage.js';
+import { ReportsPage } from './pages/ReportsPage.js';
+import { CSATSurveyPage } from './pages/CSATSurveyPage.js';
+import { PortalDashboardPage } from './pages/portal/PortalDashboardPage.js';
+import { PortalTicketsPage } from './pages/portal/PortalTicketsPage.js';
+import { PortalCreateTicketPage } from './pages/portal/PortalCreateTicketPage.js';
+import { PortalTicketDetailPage } from './pages/portal/PortalTicketDetailPage.js';
 
 export function App() {
   return (
@@ -58,7 +64,8 @@ export function App() {
           <Route path="/admin/sla-policies" element={<PlaceholderPage title="SLA Policies" />} />
           <Route path="/admin/canned-responses" element={<PlaceholderPage title="Shared Canned Responses" />} />
           <Route path="/admin/branding" element={<PlaceholderPage title="Branding" />} />
-          <Route path="/admin/reports" element={<PlaceholderPage title="Reports" />} />
+          <Route path="/admin/reports" element={<ReportsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
 
         {/* Client Portal routes */}
@@ -69,10 +76,14 @@ export function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/portal" element={<PlaceholderPage title="My Tickets" />} />
-          <Route path="/portal/tickets/new" element={<PlaceholderPage title="New Ticket" />} />
-          <Route path="/portal/tickets/:id" element={<PlaceholderPage title="Ticket Detail" />} />
+          <Route path="/portal" element={<PortalDashboardPage />} />
+          <Route path="/portal/tickets" element={<PortalTicketsPage />} />
+          <Route path="/portal/tickets/new" element={<PortalCreateTicketPage />} />
+          <Route path="/portal/tickets/:id" element={<PortalTicketDetailPage />} />
           <Route path="/portal/kb" element={<KBBrowsePage />} />
+          <Route path="/portal/kb/search" element={<KBSearchPage />} />
+          <Route path="/portal/kb/:category" element={<KBCategoryPage />} />
+          <Route path="/portal/kb/:category/:slug" element={<KBArticlePage />} />
           <Route path="/portal/profile" element={<PlaceholderPage title="Profile" />} />
         </Route>
 
@@ -82,8 +93,8 @@ export function App() {
         <Route path="/kb/:category" element={<KBCategoryPage />} />
         <Route path="/kb/:category/:slug" element={<KBArticlePage />} />
 
-        {/* CSAT Survey */}
-        <Route path="/survey/:token" element={<PlaceholderPage title="Feedback Survey" />} />
+        {/* CSAT Survey (public, no auth required) */}
+        <Route path="/survey/:token" element={<CSATSurveyPage />} />
 
         {/* Root redirect */}
         <Route path="/" element={<HomePage />} />

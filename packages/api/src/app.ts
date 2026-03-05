@@ -11,6 +11,10 @@ import { assignmentRuleRoutes } from './routes/assignment-rules.routes.js';
 import { slaPolicyRoutes } from './routes/sla-policies.routes.js';
 import { cannedResponseRoutes } from './routes/canned-responses.routes.js';
 import { kbRoutes } from './routes/kb.routes.js';
+import { reportRoutes } from './routes/reports.routes.js';
+import { csatRoutes } from './routes/csat.routes.js';
+import { collisionRoutes } from './routes/collision.routes.js';
+import { webhookRoutes } from './routes/webhooks.routes.js';
 import { registerErrorHandler } from './middleware/error-handler.middleware.js';
 
 export async function buildApp() {
@@ -50,6 +54,12 @@ export async function buildApp() {
   await app.register(slaPolicyRoutes, { prefix: '/v1' });
   await app.register(cannedResponseRoutes, { prefix: '/v1' });
   await app.register(kbRoutes, { prefix: '/v1' });
+  await app.register(reportRoutes, { prefix: '/v1' });
+  await app.register(csatRoutes, { prefix: '/v1' });
+  await app.register(collisionRoutes, { prefix: '/v1' });
+
+  // Webhook routes -- no auth required (secured by webhook signature verification)
+  await app.register(webhookRoutes, { prefix: '/v1' });
 
   return app;
 }
