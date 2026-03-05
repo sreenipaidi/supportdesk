@@ -18,4 +18,10 @@ describe('App', () => {
     expect(screen.getByText('SupportDesk')).toBeInTheDocument();
     expect(screen.getByText('Customer Support Platform')).toBeInTheDocument();
   });
+
+  it('should render Agent Login and Client Portal links', () => {
+    renderWithProviders(<App />);
+    expect(screen.getByText('Agent Login')).toBeInTheDocument();
+    expect(screen.getByText('Client Portal')).toBeInTheDocument();
+  });
 });
