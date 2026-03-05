@@ -1,5 +1,11 @@
 // Test setup file for Vitest
-// TODO: Set up test database connection
-// TODO: Run migrations before tests
-// TODO: Clean up after tests
-export {};
+// We set test environment variables before any config module is loaded.
+process.env.NODE_ENV = 'test';
+process.env.JWT_SECRET = 'test-secret-key-that-is-256-bits-long!!';
+process.env.JWT_ISSUER = 'supportdesk-test';
+process.env.JWT_EMPLOYEE_EXPIRY = '8h';
+process.env.JWT_CLIENT_EXPIRY = '24h';
+process.env.DATABASE_URL = 'postgresql://supportdesk:supportdesk@localhost:5432/supportdesk_test';
+process.env.REDIS_URL = 'redis://localhost:6379';
+process.env.CORS_ORIGINS = 'http://localhost:5173';
+process.env.LOG_LEVEL = 'silent';
