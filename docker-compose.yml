@@ -1,19 +1,17 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: busybirdies-postgres
     environment:
-      POSTGRES_USER: busybirdies
-      POSTGRES_PASSWORD: busybirdies
-      POSTGRES_DB: busybirdies
+      POSTGRES_USER: supportdesk
+      POSTGRES_PASSWORD: supportdesk
+      POSTGRES_DB: supportdesk
     ports:
       - "5432:5432"
     volumes:
       - .docker-data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U busybirdies"]
+      test: ["CMD-SHELL", "pg_isready -U supportdesk"]
       interval: 5s
       timeout: 5s
       retries: 5
