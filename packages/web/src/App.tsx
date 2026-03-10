@@ -17,6 +17,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage.js';
 import { ResetPasswordPage } from './pages/ResetPasswordPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PlaceholderPage } from './pages/PlaceholderPage.js';
+import { AssignmentRulesPage } from './pages/AssignmentRulesPage.js';
 import { AdminUsersPage } from './pages/AdminUsersPage.js';
 
 // Lazy-loaded pages (larger bundles, code-split)
@@ -122,7 +123,7 @@ export function App() {
 
             {/* Admin-only routes */}
             <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/admin/assignment-rules" element={<PlaceholderPage title="Auto-Assignment Rules" />} />
+            <Route path="/admin/assignment-rules" element={<AssignmentRulesPage />} />
             <Route path="/admin/sla-policies" element={<PlaceholderPage title="SLA Policies" />} />
             <Route path="/admin/canned-responses" element={<PlaceholderPage title="Shared Canned Responses" />} />
             <Route path="/admin/branding" element={<PlaceholderPage title="Branding" />} />
