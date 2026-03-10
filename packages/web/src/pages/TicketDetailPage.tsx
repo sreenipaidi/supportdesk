@@ -13,6 +13,7 @@ import { MentionInput } from '../components/features/tickets/MentionInput.js';
 import { CannedResponsePicker } from '../components/features/tickets/CannedResponsePicker.js';
 import { useTicket, useUpdateTicket } from '../hooks/useTicket.js';
 import { useCreateReply } from '../hooks/useReplies.js';
+import { useAgentsAndAdmins } from '../hooks/useAgents.js';
 import { useCollisionDetection } from '../hooks/useHeartbeat.js';
 import { useUIStore } from '../stores/ui.store.js';
 import { useMediaQuery } from '../hooks/useMediaQuery.js';
@@ -45,6 +46,11 @@ export function TicketDetailPage() {
   const { data, isLoading, isError, error } = useTicket(id ?? '');
   const updateTicket = useUpdateTicket(id ?? '');
   const createReply = useCreateReply(id ?? '');
+  const { data: agentsData } = useAgentsAndAdmins();
+  const agentOptions = [
+    { value: '', label: 'Unassigned' },
+    ...(agentsData?.data ?? []).map((a) => ({ value: a.id, label: a.full_name })),
+  ];
   const { otherViewers, setIsComposing } = useCollisionDetection(id);
 
   const [replyBody, setReplyBody] = useState('');
@@ -80,6 +86,18 @@ export function TicketDetailPage() {
         addToast({ type: 'success', message: `Priority changed to ${newPriority}.` });
       } catch {
         addToast({ type: 'error', message: 'Failed to update priority. Please try again.' });
+      }
+    },
+    [updateTicket, addToast],
+  );
+
+  const handleAssignChange = useCallback(
+    async (agentId: string) => {
+      try {
+        await updateTicket.mutateAsync({ assigned_agent_id: agentId || null });
+        addToast({ type: 'success', message: agentId ? 'Ticket assigned successfully.' : 'Ticket unassigned.' });
+      } catch {
+        addToast({ type: 'error', message: 'Failed to assign ticket. Please try again.' });
       }
     },
     [updateTicket, addToast],
@@ -195,14 +213,19 @@ export function TicketDetailPage() {
 
       {/* Assigned Agent */}
       <div>
-        <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">
+        <label
+          htmlFor="ticket-assignee"
+          className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1"
+        >
           Assigned To
-        </p>
-        <p className="text-sm text-text-primary">
-          {ticket.assigned_agent?.full_name ?? (
-            <span className="text-warning italic">Unassigned</span>
-          )}
-        </p>
+        </label>
+        <Select
+          id="ticket-assignee"
+          options={agentOptions}
+          value={ticket.assigned_agent?.id ?? ''}
+          onChange={(e) => handleAssignChange(e.target.value)}
+          aria-label="Assign ticket to agent"
+        />
       </div>
 
       {/* Tags */}

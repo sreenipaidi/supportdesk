@@ -22,3 +22,16 @@ export function useClients() {
       ),
   });
 }
+
+export function useAgentsAndAdmins() {
+  return useQuery<PaginatedResponse<User>>({
+    queryKey: ['agents-and-admins'],
+    queryFn: () =>
+      api.get<PaginatedResponse<User>>(
+        `${ENDPOINTS.users.list}?per_page=100`,
+      ).then((res) => ({
+        ...res,
+        data: res.data.filter((u) => u.role === 'agent' || u.role === 'admin'),
+      })),
+  });
+}
