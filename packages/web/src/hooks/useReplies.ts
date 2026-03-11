@@ -22,16 +22,17 @@ export interface CreateReplyPayload {
   is_internal: boolean;
 }
 
-export function useCreateReply(ticketId: string) {
+export function useInvalidateReplies(ticketId: string) {
   const queryClient = useQueryClient();
+  return () => {
+    // Replies are embedded in the ticket detail response, so invalidate that
+    void queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
+  };
+}
 
+export function useCreateReply(ticketId: string) {
   return useMutation<TicketReply, Error, CreateReplyPayload>({
     mutationFn: (payload) =>
       api.post<TicketReply>(ENDPOINTS.tickets.replies(ticketId), payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
-      void queryClient.invalidateQueries({ queryKey: ['replies', ticketId] });
-      void queryClient.invalidateQueries({ queryKey: ['tickets'] });
-    },
   });
 }

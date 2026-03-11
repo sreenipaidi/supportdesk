@@ -84,7 +84,7 @@ export function usePortalCreateReply(ticketId: string) {
         is_internal: false,
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['portal-ticket', ticketId] });
+      // Invalidation is handled in the component after file upload completes
       void queryClient.invalidateQueries({ queryKey: ['portal-tickets'] });
     },
   });

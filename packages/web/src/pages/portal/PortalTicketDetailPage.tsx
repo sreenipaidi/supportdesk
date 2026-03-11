@@ -7,6 +7,7 @@ import { StatusBadge, PriorityBadge } from '../../components/ui/Badge.js';
 import { Avatar } from '../../components/ui/Avatar.js';
 import { Spinner } from '../../components/ui/Spinner.js';
 import { usePortalTicketDetail, usePortalCreateReply } from '../../hooks/usePortalTickets.js';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUIStore } from '../../stores/ui.store.js';
 import { formatDateTime, formatRelative } from '../../lib/format-date.js';
 import { cn } from '../../lib/cn.js';
@@ -15,6 +16,7 @@ import type { TicketStatusVariant, PriorityVariant } from '../../components/ui/B
 
 export function PortalTicketDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
 
@@ -22,6 +24,7 @@ export function PortalTicketDetailPage() {
   const createReply = usePortalCreateReply(id ?? '');
 
   const [replyBody, setReplyBody] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   const ticket = data?.ticket;
   const replies = data?.replies ?? [];
@@ -32,8 +35,23 @@ export function PortalTicketDetailPage() {
     if (!replyBody.trim()) return;
 
     try {
-      await createReply.mutateAsync({ body: replyBody.trim() });
+      const newReply = await createReply.mutateAsync({ body: replyBody.trim() });
       setReplyBody('');
+
+      if (pendingFiles.length > 0 && newReply?.id) {
+        const formData = new FormData();
+        pendingFiles.forEach((f) => formData.append('files', f));
+        await fetch(`/v1/tickets/${id}/attachments`, {
+          method: 'POST',
+          headers: { 'x-reply-id': newReply.id },
+          credentials: 'include',
+          body: formData,
+        });
+        setPendingFiles([]);
+      }
+
+      void queryClient.invalidateQueries({ queryKey: ['portal-ticket', id] });
+
       addToast({
         type: 'success',
         message: 'Reply sent successfully.',
@@ -44,7 +62,7 @@ export function PortalTicketDetailPage() {
         message: 'Failed to send reply. Your message has been saved. Please try again.',
       });
     }
-  }, [replyBody, createReply, addToast]);
+  }, [replyBody, createReply, addToast, pendingFiles, id, queryClient]);
 
   // Loading state
   if (isLoading) {
@@ -205,7 +223,36 @@ export function PortalTicketDetailPage() {
               aria-label="Reply editor"
               disabled={createReply.isPending}
             />
-            <div className="flex items-center justify-end gap-2 mt-3">
+            {pendingFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {pendingFiles.map((f, i) => (
+                  <div key={i} className="flex items-center gap-1 bg-surface-alt border border-border rounded px-2 py-1 text-xs text-text-secondary">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    <span className="max-w-[120px] truncate">{f.name}</span>
+                    <button type="button" onClick={() => setPendingFiles((prev) => prev.filter((_, j) => j !== i))} className="ml-1 text-text-secondary hover:text-danger">×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-2 mt-3">
+              <label className="cursor-pointer text-text-secondary hover:text-primary transition-colors" title="Attach files">
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []);
+                    setPendingFiles((prev) => [...prev, ...files].slice(0, 5));
+                    e.target.value = '';
+                  }}
+                  disabled={createReply.isPending}
+                />
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </label>
               <Button
                 onClick={handleSendReply}
                 disabled={!replyBody.trim()}

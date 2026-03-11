@@ -5,6 +5,7 @@ import {
   ticketTags,
   ticketAuditEntries,
   ticketReplies,
+  ticketAttachments,
   users,
   tenants,
 } from '../db/schema.js';
@@ -581,7 +582,16 @@ export async function getTicket(
         body: row.body,
         is_internal: row.isInternal,
         source: row.source as ReplySource,
-        attachments: [], // Attachments are handled by a separate service
+        attachments: await (async () => {
+          const rows = await db.select().from(ticketAttachments).where(eq(ticketAttachments.replyId, row.id));
+          return rows.map((a) => ({
+            id: a.id,
+            file_name: a.fileName,
+            file_size: a.fileSize,
+            mime_type: a.mimeType,
+            download_url: `/v1/tickets/${a.ticketId}/attachments/${a.id}/download`,
+          }));
+        })(),
         created_at: row.createdAt.toISOString(),
       };
     }),

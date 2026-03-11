@@ -12,7 +12,7 @@ import { CollisionBanner } from '../components/features/tickets/CollisionBanner.
 import { MentionInput } from '../components/features/tickets/MentionInput.js';
 import { CannedResponsePicker } from '../components/features/tickets/CannedResponsePicker.js';
 import { useTicket, useUpdateTicket } from '../hooks/useTicket.js';
-import { useCreateReply } from '../hooks/useReplies.js';
+import { useCreateReply, useInvalidateReplies } from '../hooks/useReplies.js';
 import { useAgentsAndAdmins } from '../hooks/useAgents.js';
 import { useCollisionDetection } from '../hooks/useHeartbeat.js';
 import { useUIStore } from '../stores/ui.store.js';
@@ -46,6 +46,7 @@ export function TicketDetailPage() {
   const { data, isLoading, isError, error } = useTicket(id ?? '');
   const updateTicket = useUpdateTicket(id ?? '');
   const createReply = useCreateReply(id ?? '');
+  const invalidateReplies = useInvalidateReplies(id ?? '');
   const { data: agentsData } = useAgentsAndAdmins();
   const agentOptions = [
     { value: '', label: 'Unassigned' },
@@ -114,7 +115,7 @@ export function TicketDetailPage() {
       });
       setReplyBody('');
 
-      // Upload any pending files
+      // Upload any pending files then invalidate
       if (pendingFiles.length > 0 && newReply?.id) {
         const formData = new FormData();
         pendingFiles.forEach((f) => formData.append('files', f));
@@ -126,6 +127,9 @@ export function TicketDetailPage() {
         });
         setPendingFiles([]);
       }
+
+      // Invalidate after upload so attachments are included in the refetch
+      invalidateReplies();
 
       addToast({
         type: 'success',
