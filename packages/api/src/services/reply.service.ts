@@ -4,6 +4,7 @@ import {
   tickets,
   ticketReplies,
   ticketAuditEntries,
+  ticketAttachments,
   users,
 } from '../db/schema.js';
 import { AppError, NotFoundError, AuthorizationError } from '../lib/errors.js';
@@ -67,6 +68,23 @@ async function findUser(
  * - Sets first_responded_at on the ticket if this is the first agent reply.
  * - If a client replies to a resolved ticket, the ticket is reopened.
  */
+
+async function getReplyAttachments(db: ReturnType<typeof getDb>, replyId: string) {
+  const rows = await db
+    .select()
+    .from(ticketAttachments)
+    .where(eq(ticketAttachments.replyId, replyId));
+
+  return rows.map((a) => ({
+    id: a.id,
+    file_name: a.fileName,
+    file_size: a.fileSize,
+    mime_type: a.mimeType,
+    download_url: `/v1/tickets/${a.ticketId}/attachments/${a.id}/download`,
+    created_at: a.createdAt.toISOString(),
+  }));
+}
+
 export async function addReply(
   tenantId: string,
   ticketId: string,
@@ -196,7 +214,7 @@ export async function addReply(
     body: reply.body,
     is_internal: reply.isInternal,
     source: reply.source as ReplySource,
-    attachments: [],
+    attachments: await getReplyAttachments(db, reply.id),
     created_at: reply.createdAt.toISOString(),
   };
 }
@@ -273,7 +291,7 @@ export async function getReplies(
         body: row.body,
         is_internal: row.isInternal,
         source: row.source as ReplySource,
-        attachments: [],
+        attachments: await getReplyAttachments(db, row.id),
         created_at: row.createdAt.toISOString(),
       };
     }),
