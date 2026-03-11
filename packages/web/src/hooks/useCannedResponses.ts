@@ -67,3 +67,31 @@ export function useCreateCannedResponse() {
     },
   });
 }
+
+/** Payload for updating a canned response. */
+interface UpdateCannedResponsePayload {
+  title?: string;
+  body?: string;
+  category?: string;
+}
+
+export function useUpdateCannedResponse(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation<CannedResponse, Error, UpdateCannedResponsePayload>({
+    mutationFn: (payload) =>
+      api.patch<CannedResponse>(ENDPOINTS.cannedResponses.detail(id), payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['cannedResponses'] });
+    },
+  });
+}
+
+export function useDeleteCannedResponse() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: (id) => api.delete<void>(ENDPOINTS.cannedResponses.detail(id)),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['cannedResponses'] });
+    },
+  });
+}

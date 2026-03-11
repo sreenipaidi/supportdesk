@@ -17,6 +17,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage.js';
 import { ResetPasswordPage } from './pages/ResetPasswordPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PlaceholderPage } from './pages/PlaceholderPage.js';
+import { CannedResponsesPage } from './pages/CannedResponsesPage.js';
 import { SLAPoliciesPage } from './pages/SLAPoliciesPage.js';
 import { AssignmentRulesPage } from './pages/AssignmentRulesPage.js';
 import { AdminUsersPage } from './pages/AdminUsersPage.js';
@@ -119,14 +120,14 @@ export function App() {
             <Route path="/kb/manage" element={<KBManagePage />} />
             <Route path="/kb/manage/new" element={<KBArticleEditPage />} />
             <Route path="/kb/manage/:id/edit" element={<KBArticleEditPage />} />
-            <Route path="/canned-responses" element={<PlaceholderPage title="Canned Responses" />} />
+            <Route path="/canned-responses" element={<CannedResponsesPage />} />
             <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
 
             {/* Admin-only routes */}
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/assignment-rules" element={<AssignmentRulesPage />} />
             <Route path="/admin/sla-policies" element={<SLAPoliciesPage />} />
-            <Route path="/admin/canned-responses" element={<PlaceholderPage title="Shared Canned Responses" />} />
+            <Route path="/admin/canned-responses" element={<CannedResponsesPage adminView />} />
             <Route path="/admin/branding" element={<PlaceholderPage title="Branding" />} />
             <Route path="/admin/reports" element={<ReportsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
