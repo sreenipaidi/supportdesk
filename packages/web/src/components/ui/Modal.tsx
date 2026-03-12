@@ -60,12 +60,19 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
       document.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
 
-      // Focus first focusable element
+      // Focus first input/select/textarea, falling back to first focusable (but not the close button)
       requestAnimationFrame(() => {
-        const firstFocusable = contentRef.current?.querySelector(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        ) as HTMLElement;
-        firstFocusable?.focus();
+        const firstInput = contentRef.current?.querySelector(
+          'input, select, textarea',
+        ) as HTMLElement | null;
+        if (firstInput) {
+          firstInput.focus();
+        } else {
+          const firstFocusable = contentRef.current?.querySelector(
+            'button:not([aria-label="Close dialog"]), [href], [tabindex]:not([tabindex="-1"])',
+          ) as HTMLElement | null;
+          firstFocusable?.focus();
+        }
       });
     }
 
